@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<title>Emberline — swing through the dark</title>
+<meta name="description" content="Emberline is a one-button momentum game: tether to glowing pyres, swing through a bioluminescent cavern, and outrun the Gloom." />
+<meta name="theme-color" content="#05070e" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23070a14'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23ffc46b'/%3E%3Ccircle cx='16' cy='16' r='10' fill='none' stroke='%23ffc46b' stroke-opacity='.45' stroke-width='1.5'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div id="app">
+  <canvas id="stage" aria-label="Emberline — game canvas"></canvas>
+
+  <div class="hud" id="hud" aria-hidden="true">
+    <div class="hud-corner hud-tl">
+      <div class="metric"><span id="distance">0</span><span class="metric-unit">m</span></div>
+      <div class="metric-sub">best <span id="best">0</span> m &nbsp;·&nbsp; motes <span id="motes">0</span></div>
+    </div>
+
+    <div class="hud-corner hud-tr">
+      <button class="icon-btn" id="btn-mute" type="button" aria-label="Toggle sound">♪</button>
+      <button class="icon-btn" id="btn-pause" type="button" aria-label="Pause">❚❚</button>
+    </div>
+
+    <div class="ember" id="ember">
+      <div class="ember-head"><span>EMBER</span><span id="ember-pct">100%</span></div>
+      <div class="ember-track"><div class="ember-fill" id="ember-fill"></div></div>
+    </div>
+
+    <div class="hint" id="hint">HOLD to tether</div>
+  </div>
+
+  <div class="overlay" id="screen-title">
+    <div class="overlay-card">
+      <p class="eyebrow">a game about falling, and holding on</p>
+      <h1 class="wordmark">Emberline</h1>
+      <p class="tagline">Swing through the dark. Keep your light alive.</p>
+
+      <div class="controls">
+        <div class="ctrl"><span class="key">HOLD</span><span>fire a tether to the nearest pyre</span></div>
+        <div class="ctrl"><span class="key">RELEASE</span><span>let go and fly</span></div>
+        <div class="ctrl"><span class="key">GATHER</span><span>motes of light feed your flame</span></div>
+      </div>
+
+      <button class="cta" id="btn-start" type="button">Begin the descent</button>
+      <p class="fine">The Gloom follows. It always does.</p>
+    </div>
+  </div>
+
+  <div class="overlay hidden" id="screen-dead">
+    <div class="overlay-card">
+      <p class="eyebrow" id="death-reason">the gloom took you</p>
+      <h2 class="headline">Light out</h2>
+      <div class="stats">
+        <div class="stat"><span class="stat-value" id="death-distance">0</span><span class="stat-label">metres</span></div>
+        <div class="stat"><span class="stat-value" id="death-motes">0</span><span class="stat-label">motes</span></div>
+        <div class="stat"><span class="stat-value" id="death-best">0</span><span class="stat-label">best</span></div>
+      </div>
+      <p class="rank" id="death-rank">a brief flicker</p>
+      <button class="cta" id="btn-retry" type="button">Fall again</button>
+      <p class="fine">space or tap to retry</p>
+    </div>
+  </div>
+
+  <div class="overlay hidden" id="screen-pause">
+    <div class="overlay-card">
+      <p class="eyebrow">the dark waits patiently</p>
+      <h2 class="headline">Held</h2>
+      <button class="cta" id="btn-resume" type="button">Keep falling</button>
+      <p class="fine">esc or p to resume</p>
+    </div>
+  </div>
+
+  <div class="overlay rotate hidden" id="screen-rotate">
+    <div class="overlay-card rotate-card">
+      <p class="eyebrow">one-button, wide open</p>
+      <h2 class="headline">Turn it sideways</h2>
+      <p class="tagline">Emberline is played in landscape — the cave only really opens up on its side.</p>
+      <button class="cta" id="btn-rotate-dismiss" type="button">Play like this anyway</button>
+    </div>
+  </div>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>
