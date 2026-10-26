@@ -95,4 +95,14 @@ Les personnages et la voiture utilisent des modèles glTF/GLB chargés depuis `w
 
 Ces ressources proviennent du dépôt Three.js r170 (licence MIT pour le code ; les licences des assets individuels doivent être vérifiées avant toute distribution commerciale).
 
+| Fichier | Usage dans le jeu | Source | Licence |
+|---|---|---|---|
+| `public/hdri/city.exr` | Éclairage et reflets (image-based lighting) | Polyhaven via `@pmndrs/assets` | CC0 |
+| `public/models/weapons/pistol.glb` | Vue FPS — P99 Tactical | « CC0 Flat Guns West » (OpenGameArt, via petroulacl/fps-asset-kit) | CC0 |
+| `public/models/weapons/assault_rifle.glb` | Vue FPS — VX-4 Carbine | idem | CC0 |
+| `public/models/weapons/shotgun.glb` | Vue FPS — M590 Breacher | idem | CC0 |
+| `public/models/weapons/sniper_rifle.glb` | Vue FPS — SR-25 Nemesis | idem | CC0 |
+
+Environment: CC0 city HDRI (Polyhaven via @pmndrs/assets). Weapons: CC0 "Flat Guns West" pack (OpenGameArt). No attribution required, credited here for transparency.
+
 The characters and the car are glTF/GLB assets from Three.js r170 examples (Mixamo-rigged humanoids and a sports-car body, with Draco decoding). Individual asset licences must be verified before commercial distribution.

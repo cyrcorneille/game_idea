@@ -22,11 +22,26 @@ const BASE = import.meta.env?.BASE_URL ?? './';
 const MODEL_FILES = {
   xbot: 'models/Xbot.glb',
   soldier: 'models/Soldier.glb',
-  ferrari: 'models/ferrari.glb'
+  ferrari: 'models/ferrari.glb',
+  wpn_pistol: 'models/weapons/pistol.glb',
+  wpn_assault_rifle: 'models/weapons/assault_rifle.glb',
+  wpn_shotgun: 'models/weapons/shotgun.glb',
+  wpn_sniper_rifle: 'models/weapons/sniper_rifle.glb'
+};
+
+// Real-world overall lengths (metres) of the first-person weapon models.
+const WEAPON_LENGTH = {
+  wpn_pistol: 0.22,
+  wpn_assault_rifle: 0.92,
+  wpn_shotgun: 0.98,
+  wpn_sniper_rifle: 1.18
 };
 
 // Real-world targets in metres (game units == metres).
 const TARGET_HEIGHT = { xbot: 1.82, soldier: 1.9 };
+// Sample nodes used to find which end of a weapon is the muzzle.
+const MUZZLE_REFS = ['Attach_Muzzle', 'Pump'];
+const TRIGGER_REF = 'Trigger';
 const TARGET_CAR_LENGTH = 4.6;
 
 // Animation clip names exposed by each rig (see GLB metadata).
@@ -77,29 +92,15 @@ function buildTemplate(key, gltf) {
   });
 
   if (key === 'ferrari') {
-    // Measure the real world-space extents (node transforms included) and map the
-    // longest axis → Z (forward), the shortest → Y (up), the rest → X (lateral).
-    // Signs are chosen so the basis is a proper rotation (det = +1).
-    wrapper.updateMatrixWorld(true);
-    const raw = new THREE.Box3().setFromObject(wrapper).getSize(new THREE.Vector3());
-    const dims = [raw.x, raw.y, raw.z];
-    const [L, W, H] = [0, 1, 2].sort((a, b) => dims[b] - dims[a]);
-    const cols = [null, null, null];
-    cols[L] = new THREE.Vector3(0, 0, 1);
-    cols[H] = new THREE.Vector3(0, 1, 0);
-    cols[W] = new THREE.Vector3(1, 0, 0);
-    const det = new THREE.Matrix3().setFromMatrix4(
-      new THREE.Matrix4().makeBasis(cols[0], cols[1], cols[2])
-    ).determinant();
-    if (det < 0) cols[W].negate();
-    inner.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(cols[0], cols[1], cols[2]));
-    wrapper.updateMatrixWorld(true);
+    orientLongestToZ(inner, wrapper);
     const size = new THREE.Box3().setFromObject(wrapper).getSize(new THREE.Vector3());
     wrapper.scale.setScalar(TARGET_CAR_LENGTH / size.z);
     centerOnGround(wrapper);
-    const fin = new THREE.Box3().setFromObject(wrapper).getSize(new THREE.Vector3());
-    console.info('[ModelLibrary] ferrari raw dims', raw.toArray().map((v) => +v.toFixed(3)), 'final', fin.toArray().map((v) => +v.toFixed(2)));
     return { root: wrapper, clips: gltf.animations, kind: 'vehicle' };
+  }
+
+  if (key.startsWith('wpn_')) {
+    return buildWeaponTemplate(key, gltf, wrapper, inner);
   }
 
   // Characters: scale to target height, feet on the ground, centred on origin.
@@ -110,15 +111,99 @@ function buildTemplate(key, gltf) {
   return { root: wrapper, clips: gltf.animations, kind: 'character' };
 }
 
+/**
+ * Rotate `inner` so the world-longest axis lies on Z, the shortest on Y and the
+ * remaining one on X, using a proper rotation (det = +1). Works for any authoring axis.
+ */
+function orientLongestToZ(inner, wrapper) {
+  wrapper.updateMatrixWorld(true);
+  const raw = new THREE.Box3().setFromObject(wrapper).getSize(new THREE.Vector3());
+  const dims = [raw.x, raw.y, raw.z];
+  const [L, W, H] = [0, 1, 2].sort((a, b) => dims[b] - dims[a]);
+  const cols = [null, null, null];
+  cols[L] = new THREE.Vector3(0, 0, 1);
+  cols[H] = new THREE.Vector3(0, 1, 0);
+  cols[W] = new THREE.Vector3(1, 0, 0);
+  const det = new THREE.Matrix3().setFromMatrix4(
+    new THREE.Matrix4().makeBasis(cols[0], cols[1], cols[2])
+  ).determinant();
+  if (det < 0) cols[W].negate();
+  inner.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(cols[0], cols[1], cols[2]));
+  wrapper.updateMatrixWorld(true);
+}
+
+/**
+ * First-person weapon: forward is −Z (camera convention). The muzzle side is
+ * found from named sample nodes relative to the trigger; the model is then
+ * scaled to real length, centred, and its muzzle position is exported.
+ */
+function buildWeaponTemplate(key, gltf, wrapper, inner) {
+  orientLongestToZ(inner, wrapper);
+
+  let muzzleNode = null;
+  for (const n of MUZZLE_REFS) {
+    muzzleNode = inner.getObjectByName(n);
+    if (muzzleNode) break;
+  }
+  const trigger = inner.getObjectByName(TRIGGER_REF);
+  if (muzzleNode && trigger) {
+    const mz = muzzleNode.getWorldPosition(new THREE.Vector3()).z;
+    const tz = trigger.getWorldPosition(new THREE.Vector3()).z;
+    if (mz > tz) inner.rotation.y += Math.PI; // muzzle was at +Z → turn to −Z
+    wrapper.updateMatrixWorld(true);
+  }
+
+  const size = new THREE.Box3().setFromObject(wrapper).getSize(new THREE.Vector3());
+  wrapper.scale.setScalar(WEAPON_LENGTH[key] / size.z);
+  wrapper.updateMatrixWorld(true);
+
+  // Put the grip (trigger) at the viewmodel origin so the barrel extends forward
+  // from the hand position, exactly where the first-person mount expects it.
+  if (trigger) {
+    const grip = wrapper.worldToLocal(trigger.getWorldPosition(new THREE.Vector3()));
+    wrapper.position.sub(grip.multiply(wrapper.scale));
+  } else {
+    centerOnGround(wrapper, { ground: false });
+  }
+  wrapper.updateMatrixWorld(true);
+
+  let muzzle = new THREE.Vector3(0, 0, -WEAPON_LENGTH[key] / 2);
+  if (muzzleNode) {
+    muzzle = wrapper.worldToLocal(muzzleNode.getWorldPosition(new THREE.Vector3()));
+  }
+  return { root: wrapper, clips: [], kind: 'weapon', muzzle };
+}
+
 /** Shift an object so its XZ centre is at origin and its lowest point is y=0. */
-function centerOnGround(obj) {
+function centerOnGround(obj, { ground = true } = {}) {
   obj.updateMatrixWorld(true);
   const box = new THREE.Box3().setFromObject(obj);
   const c = box.getCenter(new THREE.Vector3());
   obj.position.x -= c.x;
   obj.position.z -= c.z;
-  obj.position.y -= box.min.y;
+  if (ground) {
+    obj.position.y -= box.min.y;
+  } else {
+    obj.position.y -= c.y;
+  }
   obj.updateMatrixWorld(true);
+}
+
+/**
+ * Instance a first-person weapon model. Returns { root, muzzle } where `muzzle`
+ * is the muzzle position in the weapon's local space (for the muzzle-flash light).
+ */
+export function createWeaponModel(weaponId) {
+  const tpl = templates[`wpn_${weaponId}`];
+  if (!tpl) return null;
+  const root = SkeletonUtils.clone(tpl.root);
+  root.traverse((o) => {
+    if (o.isMesh) {
+      o.castShadow = false;
+      o.receiveShadow = false;
+    }
+  });
+  return { root, muzzle: tpl.muzzle.clone() };
 }
 
 /** Fresh instance of the sports-car body (wheels are separate child nodes). */

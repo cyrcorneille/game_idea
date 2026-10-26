@@ -8,6 +8,7 @@ import { SaveSystem } from './engine/SaveSystem.js';
 import { GameSimulation } from './engine/GameSimulation.js';
 import { UIManager } from './ui/UIManager.js';
 import { preloadModels } from './engine/ModelLibrary.js';
+import { preloadEnvironment } from './engine/Environment.js';
 
 const canvas = document.getElementById('game-canvas');
 const input = new InputManager(canvas);
@@ -16,7 +17,7 @@ const saveSystem = new SaveSystem();
 
 // Characters & vehicles are glTF assets: load them before the world is built so
 // every spawned entity gets the realistic model instead of the primitive fallback.
-preloadModels().then(() => {
+Promise.all([preloadModels(), preloadEnvironment()]).then(() => {
   const sim = new GameSimulation(canvas, input, audio, saveSystem);
   const ui = new UIManager(sim, input, audio, saveSystem);
 

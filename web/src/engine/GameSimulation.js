@@ -20,6 +20,7 @@ import {
   SIDE_ACTIVITIES
 } from '../data/gameData.js';
 import { UI_STRINGS } from '../data/localization.js';
+import { applyImageBasedLighting } from './Environment.js';
 import {
   createMaterialLibrary,
   createPlayerRig,
@@ -163,6 +164,9 @@ export class GameSimulation {
     this.renderer.toneMappingExposure = 1.12;
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    // Realistic reflections: city HDRI as image-based lighting (see Environment.js)
+    applyImageBasedLighting(this.renderer, this.scene);
 
     // Subtle Neo-Noir Bloom Post-Processing
     this.composer = new EffectComposer(this.renderer);
@@ -419,10 +423,10 @@ export class GameSimulation {
   applyEnvironmentVisuals() {
     const timeKey = TIME_STATES[this.timeIndex % TIME_STATES.length];
     const presets = {
-      DAWN: { bg: 0x1a1c33, fog: 0x242642, sun: 0xfb923c, intensity: 1.05, hemi: 0.78, sodium: 1.1 },
-      DAY: { bg: 0x3b5878, fog: 0x4b6888, sun: 0xf8fafc, intensity: 1.65, hemi: 1.05, sodium: 0.35 },
-      DUSK: { bg: 0x1f1629, fog: 0x2a1b30, sun: 0xd97706, intensity: 0.95, hemi: 0.72, sodium: 1.45 },
-      NIGHT: { bg: 0x070b14, fog: 0x091122, sun: 0x60a5fa, intensity: 0.68, hemi: 0.62, sodium: 2.15 }
+      DAWN: { bg: 0x1a1c33, fog: 0x242642, sun: 0xfb923c, intensity: 1.05, hemi: 0.78, sodium: 1.1, env: 0.8 },
+      DAY: { bg: 0x3b5878, fog: 0x4b6888, sun: 0xf8fafc, intensity: 1.65, hemi: 1.05, sodium: 0.35, env: 1.1 },
+      DUSK: { bg: 0x1f1629, fog: 0x2a1b30, sun: 0xd97706, intensity: 0.95, hemi: 0.72, sodium: 1.45, env: 0.7 },
+      NIGHT: { bg: 0x070b14, fog: 0x091122, sun: 0x60a5fa, intensity: 0.68, hemi: 0.62, sodium: 2.15, env: 0.55 }
     };
     const p = presets[timeKey];
     this.scene.background.setHex(p.bg);
@@ -432,6 +436,8 @@ export class GameSimulation {
     this.dirLight.intensity = p.intensity;
     this.hemiLight.intensity = p.hemi;
     this.sodiumFill.intensity = p.sodium;
+    // Reflections follow the sky: strong by day, subdued at night (wet-street glare stays via roughness).
+    this.scene.environmentIntensity = this.weather === 'RAIN' ? p.env * 1.15 : p.env;
     this.mats.asphalt.roughness = this.weather === 'RAIN' ? 0.16 : 0.58;
     this.rainPoints.visible = this.weather === 'RAIN';
     this.audio.setRain(this.weather === 'RAIN');

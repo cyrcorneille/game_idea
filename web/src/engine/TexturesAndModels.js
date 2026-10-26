@@ -4,7 +4,7 @@
  */
 
 import * as THREE from 'three';
-import { hasModel, createCharacter, createVehicleModel } from './ModelLibrary.js';
+import { hasModel, createCharacter, createVehicleModel, createWeaponModel } from './ModelLibrary.js';
 
 function makeCanvasTexture(w, h, drawFn, repeatX = 1, repeatY = 1) {
   const canvas = document.createElement('canvas');
@@ -264,7 +264,20 @@ function createModelPlayerRig() {
   };
 }
 
+/** First-person viewmodel from the CC0 weapon GLB; muzzle flash sits at the real muzzle. */
+function createModelViewmodel(weaponId) {
+  const { root, muzzle } = createWeaponModel(weaponId);
+  const group = new THREE.Group();
+  group.add(root);
+  const muzzleFlash = new THREE.PointLight(0xffb74d, 0, 7);
+  muzzleFlash.position.copy(muzzle);
+  group.add(muzzleFlash);
+  group.userData.muzzleFlash = muzzleFlash;
+  return group;
+}
+
 export function createFPSWeaponViewmodel(weaponId) {
+  if (hasModel(`wpn_${weaponId}`)) return createModelViewmodel(weaponId);
   const group = new THREE.Group();
   const metal = new THREE.MeshStandardMaterial({ color: 0x1e2533, roughness: 0.28, metalness: 0.84 });
   const darkGrip = new THREE.MeshStandardMaterial({ color: 0x0b0f18, roughness: 0.72, metalness: 0.2 });
