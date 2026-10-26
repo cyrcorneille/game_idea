@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/WeaponData.gd" id="1_wpn"]
+
+[resource]
+script = ExtResource("1_wpn")
+id = "shotgun"
+display_name_fr = "M590 Breacher"
+display_name_en = "M590 Breacher"
+category = "SHOTGUN"
+damage = 16.0
+pellets = 8
+fire_rate = 1.25
+mag_size = 8
+max_reserve = 48
+reload_time = 2.1
+recoil_kick = 0.65
+spread_hip_deg = 6.5
+spread_ads_deg = 4.2
+ads_fov = 60.0
+effective_range = 22.0
+crit_multiplier = 1.4
+price = 900

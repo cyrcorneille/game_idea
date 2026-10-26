@@ -1,0 +1,28 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/puzzles/SequenceOrderPuzzle.gd" id="1_pzl"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_pylon"]
+top_radius = 0.25
+bottom_radius = 0.35
+height = 2.2
+
+[node name="SequenceOrderPuzzle" type="Node3D"]
+script = ExtResource("1_pzl")
+puzzle_id = "bunker_sequence"
+
+[node name="Pylon0" type="MeshInstance3D" parent="."]
+position = Vector3(-4.5, 1.1, 0)
+mesh = SubResource("CylinderMesh_pylon")
+
+[node name="Pylon1" type="MeshInstance3D" parent="."]
+position = Vector3(-1.5, 1.1, 0)
+mesh = SubResource("CylinderMesh_pylon")
+
+[node name="Pylon2" type="MeshInstance3D" parent="."]
+position = Vector3(1.5, 1.1, 0)
+mesh = SubResource("CylinderMesh_pylon")
+
+[node name="Pylon3" type="MeshInstance3D" parent="."]
+position = Vector3(4.5, 1.1, 0)
+mesh = SubResource("CylinderMesh_pylon")

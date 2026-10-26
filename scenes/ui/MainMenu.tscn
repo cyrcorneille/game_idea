@@ -1,0 +1,46 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/MainMenuController.gd" id="1_mm"]
+[ext_resource type="Texture2D" path="res://interface/artwork/hero_keyart.jpg" id="2_hero"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_mm")
+
+[node name="KeyArtBackground" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource("2_hero")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="CenterBox" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="VBox" type="VBoxContainer" parent="CenterBox"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="CenterBox/VBox"]
+layout_mode = 2
+horizontal_alignment = 1
+text = "N E X U S"
+
+[node name="PlayButton" type="Button" parent="CenterBox/VBox"]
+layout_mode = 2
+text = "JOUER LA CAMPAGNE"
+
+[node name="ContinueButton" type="Button" parent="CenterBox/VBox"]
+layout_mode = 2
+text = "CONTINUER"
+
+[node name="LangButton" type="Button" parent="CenterBox/VBox"]
+layout_mode = 2
+text = "Langue / Language : FR"

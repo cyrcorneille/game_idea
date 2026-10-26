@@ -1,0 +1,24 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/entities/EnemyAI.gd" id="1_enm"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_enm"]
+radius = 0.44
+height = 1.85
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_enm"]
+radius = 0.44
+height = 1.85
+
+[node name="Enemy" type="CharacterBody3D"]
+script = ExtResource("1_enm")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+position = Vector3(0, 0.92, 0)
+shape = SubResource("CapsuleShape3D_enm")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.92, 0)
+mesh = SubResource("CapsuleMesh_enm")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]

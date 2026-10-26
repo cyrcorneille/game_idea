@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/EnemyData.gd" id="1_enemy"]
+
+[resource]
+script = ExtResource("1_enemy")
+id = "marksman"
+display_name_fr = "Tireur Éclipse"
+display_name_en = "Eclipse Marksman"
+behavior_type = "RANGED"
+is_boss = false
+max_health = 75.0
+move_speed = 3.9
+attack_damage = 12.0
+attack_range = 26.0
+detection_range = 32.0
+attack_cooldown = 1.6
+xp_reward = 55
+money_reward = 80
+tint_color = Color(0.22, 0.74, 0.97, 1)

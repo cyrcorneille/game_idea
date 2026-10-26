@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/WeaponData.gd" id="1_wpn"]
+
+[resource]
+script = ExtResource("1_wpn")
+id = "pistol"
+display_name_fr = "P99 Tactical"
+display_name_en = "P99 Tactical"
+category = "PISTOL"
+damage = 28.0
+pellets = 1
+fire_rate = 4.2
+mag_size = 15
+max_reserve = 90
+reload_time = 1.35
+recoil_kick = 0.18
+spread_hip_deg = 1.6
+spread_ads_deg = 0.35
+ads_fov = 58.0
+effective_range = 45.0
+crit_multiplier = 1.75
+price = 0

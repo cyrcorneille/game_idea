@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/ItemData.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+id = "vest_exo"
+display_name_fr = "Manteau Blindé Exo-Weave"
+display_name_en = "Exo-Weave Armored Coat"
+item_type = "ARMOR_TORSO"
+bonus_max_health = 45.0
+bonus_max_stamina = 10.0
+damage_reduction = 0.2
+damage_multiplier_bonus = 0.0
+recoil_reduction_bonus = 0.0
+mag_capacity_bonus = 0.0
+price = 1100
+material_id = "polymer"
+material_cost = 1

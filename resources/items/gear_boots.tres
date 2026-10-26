@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/ItemData.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+id = "gear_boots"
+display_name_fr = "Bottes Cinétiques Silencieuses"
+display_name_en = "Silent Kinetic Boots"
+item_type = "ARMOR_TACTICAL"
+bonus_max_health = 0.0
+bonus_max_stamina = 20.0
+damage_reduction = 0.04
+damage_multiplier_bonus = 0.0
+recoil_reduction_bonus = 0.0
+mag_capacity_bonus = 0.0
+price = 700
+material_id = ""
+material_cost = 0

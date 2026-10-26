@@ -1,0 +1,61 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/entities/PlayerController.gd" id="1_plr"]
+[ext_resource type="Script" path="res://scripts/entities/WeaponRig.gd" id="2_rig"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
+radius = 0.42
+height = 1.82
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
+radius = 0.42
+height = 1.82
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_interact"]
+radius = 3.2
+
+[node name="Player" type="CharacterBody3D"]
+script = ExtResource("1_plr")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+position = Vector3(0, 0.91, 0)
+shape = SubResource("CapsuleShape3D_body")
+
+[node name="VisualBody" type="Node3D" parent="."]
+
+[node name="BodyMesh" type="MeshInstance3D" parent="VisualBody"]
+position = Vector3(0, 0.91, 0)
+mesh = SubResource("CapsuleMesh_body")
+
+[node name="LedgeLowRay" type="RayCast3D" parent="VisualBody"]
+position = Vector3(0, 0.75, 0)
+target_position = Vector3(0, 0, -1.1)
+
+[node name="LedgeHighRay" type="RayCast3D" parent="VisualBody"]
+position = Vector3(0, 1.75, 0)
+target_position = Vector3(0, 0, -1.1)
+
+[node name="CameraPivot" type="Node3D" parent="."]
+position = Vector3(0, 1.55, 0)
+
+[node name="SpringArm3D" type="SpringArm3D" parent="CameraPivot"]
+spring_length = 4.6
+
+[node name="ThirdPersonCamera" type="Camera3D" parent="CameraPivot/SpringArm3D"]
+current = true
+fov = 68.0
+
+[node name="FirstPersonCamera" type="Camera3D" parent="CameraPivot"]
+fov = 75.0
+
+[node name="WeaponMount" type="Node3D" parent="CameraPivot/FirstPersonCamera"]
+position = Vector3(0.26, -0.24, -0.45)
+
+[node name="WeaponRig" type="Node3D" parent="CameraPivot/FirstPersonCamera/WeaponMount"]
+script = ExtResource("2_rig")
+
+[node name="InteractArea" type="Area3D" parent="."]
+position = Vector3(0, 1.0, 0)
+
+[node name="InteractShape" type="CollisionShape3D" parent="InteractArea"]
+shape = SubResource("SphereShape3D_interact")

@@ -1,0 +1,81 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/HUDController.gd" id="1_hud"]
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_hud")
+
+[node name="DamageIndicator" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.93, 0.16, 0.16, 0)
+
+[node name="TransitionBanner" type="Label" parent="."]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -280.0
+offset_top = -180.0
+offset_right = 280.0
+offset_bottom = -130.0
+horizontal_alignment = 1
+text = "— MODE EXPLORATION —"
+
+[node name="MarginRoot" type="MarginContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="TopLeft" type="VBoxContainer" parent="MarginRoot"]
+layout_mode = 2
+
+[node name="ModeLabel" type="Label" parent="MarginRoot/TopLeft"]
+layout_mode = 2
+text = "MODE EXPLORATION (3P)"
+
+[node name="StatsLabel" type="Label" parent="MarginRoot/TopLeft"]
+layout_mode = 2
+text = "Zone 1 — Centre-ville | Nv.1 | 350 €"
+
+[node name="TopRight" type="VBoxContainer" parent="MarginRoot"]
+layout_mode = 2
+
+[node name="ObjectiveLabel" type="Label" parent="MarginRoot/TopRight"]
+layout_mode = 2
+horizontal_alignment = 2
+text = "OBJECTIF ACTIF"
+
+[node name="BottomLeft" type="VBoxContainer" parent="MarginRoot"]
+layout_mode = 2
+
+[node name="HealthBar" type="ProgressBar" parent="MarginRoot/BottomLeft"]
+layout_mode = 2
+max_value = 115.0
+value = 115.0
+
+[node name="StaminaBar" type="ProgressBar" parent="MarginRoot/BottomLeft"]
+layout_mode = 2
+value = 100.0
+
+[node name="BottomRight" type="VBoxContainer" parent="MarginRoot"]
+layout_mode = 2
+
+[node name="AmmoLabel" type="Label" parent="MarginRoot/BottomRight"]
+layout_mode = 2
+horizontal_alignment = 2
+text = "P99 Tactical : 15 / 90"
+
+[node name="SubtitlePanel" type="PanelContainer" parent="MarginRoot"]
+visible = false
+layout_mode = 2
+
+[node name="SubtitleLabel" type="Label" parent="MarginRoot/SubtitlePanel"]
+layout_mode = 2
+horizontal_alignment = 1
+text = ""

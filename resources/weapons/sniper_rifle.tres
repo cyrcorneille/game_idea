@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/WeaponData.gd" id="1_wpn"]
+
+[resource]
+script = ExtResource("1_wpn")
+id = "sniper_rifle"
+display_name_fr = "SR-25 Nemesis"
+display_name_en = "SR-25 Nemesis"
+category = "SNIPER_RIFLE"
+damage = 95.0
+pellets = 1
+fire_rate = 0.95
+mag_size = 6
+max_reserve = 36
+reload_time = 2.4
+recoil_kick = 0.8
+spread_hip_deg = 3.8
+spread_ads_deg = 0.06
+ads_fov = 26.0
+effective_range = 160.0
+crit_multiplier = 2.0
+price = 1250

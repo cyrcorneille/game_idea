@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/puzzles/LeverDoorPuzzle.gd" id="1_pzl"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_gate"]
+size = Vector3(4.0, 3.4, 0.4)
+
+[node name="LeverDoorPuzzle" type="Node3D"]
+script = ExtResource("1_pzl")
+puzzle_id = "courthouse_levers"
+
+[node name="HydraulicGate" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.7, 0)
+mesh = SubResource("BoxMesh_gate")

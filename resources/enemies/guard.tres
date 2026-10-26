@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/EnemyData.gd" id="1_enemy"]
+
+[resource]
+script = ExtResource("1_enemy")
+id = "guard"
+display_name_fr = "Bastion Éclipse"
+display_name_en = "Eclipse Bastion"
+behavior_type = "GUARD"
+is_boss = false
+max_health = 135.0
+move_speed = 3.2
+attack_damage = 20.0
+attack_range = 2.4
+detection_range = 22.0
+attack_cooldown = 1.85
+xp_reward = 65
+money_reward = 95
+tint_color = Color(0.96, 0.62, 0.04, 1)
