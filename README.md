@@ -80,3 +80,19 @@ game_idea/
 ├── tests/                         # Suites de validation Godot 4 & vérificateur AST gdparse
 └── web/                           # Édition Web 3D jouable complète (Three.js + WebAudio + HUD Néo-Noir)
 ```
+
+---
+
+## Crédits des modèles 3D / 3D model credits
+
+Les personnages et la voiture utilisent des modèles glTF/GLB chargés depuis `web/public/models/` (décodage Draco dans `web/public/draco/`).
+
+| Fichier | Usage dans le jeu | Source | Licence |
+|---|---|---|---|
+| `Xbot.glb` | Marcus Vance (joueur), civils | Three.js examples (`examples/models/gltf/`), rig Mixamo | Mixamo / à vérifier avant usage commercial |
+| `Soldier.glb` | Exécuteurs Éclipse, Gardes, Tireurs | Three.js examples, rig Mixamo | Mixamo / à vérifier avant usage commercial |
+| `ferrari.glb` | Berline (carrosserie de substitution) | Three.js examples | Licence de l'auteur d'origine à vérifier avant usage commercial |
+
+Ces ressources proviennent du dépôt Three.js r170 (licence MIT pour le code ; les licences des assets individuels doivent être vérifiées avant toute distribution commerciale).
+
+The characters and the car are glTF/GLB assets from Three.js r170 examples (Mixamo-rigged humanoids and a sports-car body, with Draco decoding). Individual asset licences must be verified before commercial distribution.

@@ -4,6 +4,7 @@
  */
 
 import * as THREE from 'three';
+import { hasModel, createCharacter, createVehicleModel } from './ModelLibrary.js';
 
 function makeCanvasTexture(w, h, drawFn, repeatX = 1, repeatY = 1) {
   const canvas = document.createElement('canvas');
@@ -113,7 +114,45 @@ export function createMaterialLibrary() {
   };
 }
 
+/** Melee slash arc + parry dome VFX shared by procedural and model player rigs. */
+function attachPlayerVfx(root) {
+  // Melee Slash Arc VFX mesh
+  const slashGeo = new THREE.RingGeometry(0.85, 2.35, 24, 1, -Math.PI * 0.45, Math.PI * 0.9);
+  const slashMat = new THREE.MeshBasicMaterial({
+    color: 0x38bdf8,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.0,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+  const slashArc = new THREE.Mesh(slashGeo, slashMat);
+  slashArc.rotation.x = -Math.PI / 2;
+  slashArc.position.set(0, 1.15, -0.6);
+  root.add(slashArc);
+
+  // Parry Shield dome VFX
+  const shieldMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(1.15, 16, 12, 0, Math.PI * 2, 0, Math.PI * 0.65),
+    new THREE.MeshBasicMaterial({
+      color: 0x38bdf8,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.0
+    })
+  );
+  shieldMesh.position.y = 1.05;
+  root.add(shieldMesh);
+
+  return { slashArc, slashMat, shieldMesh };
+}
+
+/**
+ * Player rig. Uses the rigged Xbot model when loaded (ModelLibrary), otherwise
+ * falls back to the articulated primitive rig below.
+ */
 export function createPlayerRig() {
+  if (hasModel('xbot')) return createModelPlayerRig();
   const root = new THREE.Group();
 
   const coatMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.42, metalness: 0.25 });
@@ -181,35 +220,10 @@ export function createPlayerRig() {
   rightLegPivot.add(rightLeg);
   hips.add(rightLegPivot);
 
-  // Melee Slash Arc VFX mesh
-  const slashGeo = new THREE.RingGeometry(0.85, 2.35, 24, 1, -Math.PI * 0.45, Math.PI * 0.9);
-  const slashMat = new THREE.MeshBasicMaterial({
-    color: 0x38bdf8,
-    side: THREE.DoubleSide,
-    transparent: true,
-    opacity: 0.0,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false
-  });
-  const slashArc = new THREE.Mesh(slashGeo, slashMat);
-  slashArc.rotation.x = -Math.PI / 2;
-  slashArc.position.set(0, 1.15, -0.6);
-  root.add(slashArc);
-
-  // Parry Shield dome VFX
-  const shieldMesh = new THREE.Mesh(
-    new THREE.SphereGeometry(1.15, 16, 12, 0, Math.PI * 2, 0, Math.PI * 0.65),
-    new THREE.MeshBasicMaterial({
-      color: 0x38bdf8,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.0
-    })
-  );
-  shieldMesh.position.y = 1.05;
-  root.add(shieldMesh);
+  const { slashArc, slashMat, shieldMesh } = attachPlayerVfx(root);
 
   return {
+    poseAttack(angle) { rightArmPivot.rotation.x = angle; },
     root,
     hips,
     leftArmPivot,
@@ -220,6 +234,33 @@ export function createPlayerRig() {
     slashArc,
     slashMat,
     shieldMesh
+  };
+}
+
+/** Rigged-model player: locomotion comes from the animation clips, melee from additive bone poses. */
+function createModelPlayerRig() {
+  const root = new THREE.Group();
+  const char = createCharacter('xbot', { tint: 0x4b5263 });
+  root.add(char.root);
+  const { slashArc, slashMat, shieldMesh } = attachPlayerVfx(root);
+  const proxy = () => new THREE.Object3D();
+  return {
+    root,
+    isModel: true,
+    anim: char.anim,
+    hips: proxy(),
+    leftArmPivot: proxy(),
+    rightArmPivot: proxy(),
+    leftLegPivot: proxy(),
+    rightLegPivot: proxy(),
+    baton: null,
+    slashArc,
+    slashMat,
+    shieldMesh,
+    /** Raise the right arm for a melee swing (procedural rigs use the pivot instead). */
+    poseAttack(angle) {
+      char.anim.pose('RightArm', 'x', angle);
+    }
   };
 }
 
@@ -286,9 +327,66 @@ export function createFPSWeaponViewmodel(weaponId) {
   return group;
 }
 
+/** Éclipse enforcer built from the rigged Soldier model; combat overlays are kept procedural. */
+function createModelEnemy(archetype, group, scale) {
+  const tint = archetype.isBoss || String(archetype.id).startsWith('boss_') ? ENEMY_TINT.boss : (ENEMY_TINT[archetype.id] ?? ENEMY_TINT.rusher);
+  const char = createCharacter('soldier', { tint });
+  group.add(char.root);
+
+  let shieldMesh = null;
+  if (archetype.shielded) {
+    shieldMesh = new THREE.Mesh(
+      new THREE.BoxGeometry(0.88, 1.35, 0.09),
+      new THREE.MeshStandardMaterial({
+        color: 0x0f172a,
+        emissive: 0xf59e0b,
+        emissiveIntensity: 0.35,
+        metalness: 0.75,
+        roughness: 0.25
+      })
+    );
+    shieldMesh.position.set(0, 1.05, 0.38);
+    group.add(shieldMesh);
+  }
+
+  const telegraphRing = new THREE.Mesh(
+    new THREE.RingGeometry(0.65, 0.85, 20),
+    new THREE.MeshBasicMaterial({ color: 0xf59e0b, side: THREE.DoubleSide, transparent: true, opacity: 0 })
+  );
+  telegraphRing.rotation.x = -Math.PI / 2;
+  telegraphRing.position.y = 0.04;
+  group.add(telegraphRing);
+
+  const hpBg = new THREE.Mesh(
+    new THREE.PlaneGeometry(1.1, 0.12),
+    new THREE.MeshBasicMaterial({ color: 0x090d16, side: THREE.DoubleSide })
+  );
+  hpBg.position.y = 2.18;
+  const hpFill = new THREE.Mesh(
+    new THREE.PlaneGeometry(1.04, 0.075),
+    new THREE.MeshBasicMaterial({ color: archetype.color, side: THREE.DoubleSide })
+  );
+  hpFill.position.set(0, 2.18, 0.01);
+  group.add(hpBg, hpFill);
+
+  group.scale.setScalar(scale);
+  return { group, hpFill, hpBg, shieldMesh, telegraphRing, anim: char.anim };
+}
+
+const ENEMY_TINT = {
+  rusher: 0x9aa3b2,
+  guard: 0x8f8a7e,
+  marksman: 0x7f8ca3,
+  boss: 0x6e5c8f
+};
+
 export function createEnemyMesh(archetype) {
   const group = new THREE.Group();
   const scale = archetype.isBoss ? 1.24 : 1.0;
+
+  if (hasModel('soldier')) {
+    return createModelEnemy(archetype, group, scale);
+  }
 
   const armorMat = new THREE.MeshStandardMaterial({
     color: archetype.isBoss ? 0x1a1022 : 0x171f2e,
@@ -356,7 +454,61 @@ export function createEnemyMesh(archetype) {
   return { group, hpFill, hpBg, shieldMesh, telegraphRing };
 }
 
+/**
+ * Berline built from the sports-car model. Wheels are re-parented under spinner
+ * pivots whose local X is the axle, so the driving code can keep rotating
+ * `wheel.rotation.x` regardless of how the asset was authored.
+ */
+function createModelVehicle() {
+  return createVehicleModel();
+}
+
+function createModelCar() {
+  const car = new THREE.Group();
+  const body = createModelVehicle();
+  car.add(body);
+  car.updateMatrixWorld(true);
+
+  // Lights: the red tail lamps must sit at +Z so the nose faces −Z (driving convention).
+  const tail = car.getObjectByName('lights_red');
+  if (tail) {
+    const tb = new THREE.Box3().setFromObject(tail);
+    if (!tb.isEmpty() && tb.getCenter(new THREE.Vector3()).z < 0) body.rotation.y = Math.PI;
+    car.updateMatrixWorld(true);
+  }
+
+  const wheels = [];
+  ['wheel_fl', 'wheel_fr', 'wheel_rl', 'wheel_rr'].forEach((name) => {
+    const node = car.getObjectByName(name);
+    if (!node) return;
+    const box = new THREE.Box3().setFromObject(node);
+    const size = box.getSize(new THREE.Vector3());
+    const center = box.getCenter(new THREE.Vector3());
+    const dims = [size.x, size.y, size.z];
+    const axleIdx = dims.indexOf(Math.min(...dims));
+    const align = new THREE.Group();
+    align.position.copy(center);
+    if (axleIdx === 1) align.rotation.z = Math.PI / 2;
+    if (axleIdx === 2) align.rotation.y = Math.PI / 2;
+    const spinner = new THREE.Group();
+    align.add(spinner);
+    car.add(align);
+    spinner.attach(node);
+    wheels.push(spinner);
+  });
+
+  return { car, wheels };
+}
+
 export function createBerlineCarMesh() {
+  if (hasModel('ferrari')) {
+    const { car, wheels } = createModelCar();
+    const beam = new THREE.SpotLight(0xfff1cc, 4.2, 34, Math.PI * 0.24, 0.45, 1.2);
+    beam.position.set(0, 0.8, -2.2);
+    beam.target.position.set(0, 0.1, -16);
+    car.add(beam, beam.target);
+    return { car, wheels, beam };
+  }
   const car = new THREE.Group();
   const paint = new THREE.MeshStandardMaterial({ color: 0x0d1320, roughness: 0.16, metalness: 0.86 });
   const glass = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.1, metalness: 0.9, opacity: 0.65, transparent: true });

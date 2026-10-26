@@ -834,6 +834,7 @@ export class GameSimulation {
 
     this._updateWorldPuzzlesAndNPCs(dt, elapsedSec);
     this._updateEnemies(dt, elapsedSec);
+    this._updateAnimations(dt);
     this._updateTracers(dt);
     this._updateMissionProgress(dt, elapsedSec);
     this._updateCamera(dt);
@@ -1000,17 +1001,23 @@ export class GameSimulation {
 
     // Character limb animation
     const horizSpeed = Math.hypot(this.playerVel.x, this.playerVel.z);
+    // Rigged-model players are animated by CharacterAnimator (see _updateAnimations);
+    // the procedural limb swing only drives the primitive fallback rig.
     if (horizSpeed > 0.35) {
-      this.walkCycle += dt * horizSpeed * 1.45;
-      const swing = Math.sin(this.walkCycle) * 0.55;
-      this.playerRig.leftLegPivot.rotation.x = swing;
-      this.playerRig.rightLegPivot.rotation.x = -swing;
-      this.playerRig.leftArmPivot.rotation.x = -swing * 0.7;
-      if (this.attackCooldown <= 0) this.playerRig.rightArmPivot.rotation.x = swing * 0.7;
+      if (!this.playerRig.isModel) {
+        this.walkCycle += dt * horizSpeed * 1.45;
+        const swing = Math.sin(this.walkCycle) * 0.55;
+        this.playerRig.leftLegPivot.rotation.x = swing;
+        this.playerRig.rightLegPivot.rotation.x = -swing;
+        this.playerRig.leftArmPivot.rotation.x = -swing * 0.7;
+        if (this.attackCooldown <= 0) this.playerRig.rightArmPivot.rotation.x = swing * 0.7;
+      }
       this.playerRig.root.rotation.y = Math.atan2(-this.playerVel.x, -this.playerVel.z) + Math.PI;
     } else {
-      this.playerRig.leftLegPivot.rotation.x *= 0.85;
-      this.playerRig.rightLegPivot.rotation.x *= 0.85;
+      if (!this.playerRig.isModel) {
+        this.playerRig.leftLegPivot.rotation.x *= 0.85;
+        this.playerRig.rightLegPivot.rotation.x *= 0.85;
+      }
       this.playerRig.root.rotation.y = this.yaw;
     }
 
@@ -1112,7 +1119,7 @@ export class GameSimulation {
     }
     this.comboResetTimer = 1.4;
     this.slashFade = 0.92;
-    this.playerRig.rightArmPivot.rotation.x = -1.35;
+    this.playerRig.poseAttack(-1.35);
     this.audio.playMelee(isHeavy);
 
     // Soft-assist toward nearest close enemy for visceral GoW feel
@@ -1339,6 +1346,13 @@ export class GameSimulation {
   }
 
   // === ENEMY AI STATE MACHINE (Section 5.2 & 5.3) ===
+  /** Advance skeletal animation for the player, enemies and civilians (model-based rigs). */
+  _updateAnimations(dt) {
+    this.playerRig.anim?.update(dt);
+    for (const e of this.enemies) e.anim?.update(dt);
+    for (const npc of this.worldBuilder.npcs) npc.anim?.update(dt);
+  }
+
   _updateEnemies(dt, elapsedSec) {
     this.enemies = this.enemies.filter((e) => e.hp > 0);
     for (const e of this.enemies) {

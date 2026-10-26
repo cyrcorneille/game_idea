@@ -4,6 +4,7 @@
  */
 
 import * as THREE from 'three';
+import { hasModel, createCharacter } from './ModelLibrary.js';
 
 export class WorldZoneBuilder {
   constructor(scene, mats) {
@@ -467,9 +468,16 @@ export class WorldZoneBuilder {
         color: idx === 0 ? 0x334155 : idx === 1 ? 0x475569 : 0x7c2d12,
         roughness: 0.6
       });
-      const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.32, 1.05, 4, 8), bodyMat);
-      torso.position.y = 0.9;
-      npcGroup.add(torso);
+      let npcAnim = null;
+      const civilian = hasModel('xbot') ? createCharacter('xbot', { tint: [0x9ca3af, 0x8b949e, 0xb5a58f][idx] }) : null;
+      if (civilian) {
+        npcGroup.add(civilian.root);
+        npcAnim = civilian.anim;
+      } else {
+        const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.32, 1.05, 4, 8), bodyMat);
+        torso.position.y = 0.9;
+        npcGroup.add(torso);
+      }
 
       // Rain Umbrella on downtown/dock citizens
       const umb = new THREE.Mesh(new THREE.ConeGeometry(0.72, 0.25, 10), this.mats.concrete);
@@ -491,6 +499,7 @@ export class WorldZoneBuilder {
 
       const npcObj = {
         group: npcGroup,
+        anim: npcAnim,
         profile: prof,
         rumorId,
         homeX: startX,
