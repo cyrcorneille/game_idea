@@ -15,6 +15,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
+import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js';
 
 const BASE = import.meta.env?.BASE_URL ?? './';
@@ -54,19 +55,26 @@ const templates = {};
 let loadPromise = null;
 
 /** Load every model once. Resolves even if individual assets fail. */
-export function preloadModels() {
+export function preloadModels(onProgress = () => {}) {
   if (!loadPromise) {
     const draco = new DRACOLoader();
     draco.setDecoderPath(BASE + 'draco/gltf/');
     const loader = new GLTFLoader();
     loader.setDRACOLoader(draco);
+    loader.setMeshoptDecoder(MeshoptDecoder);
+    const entries = Object.entries(MODEL_FILES);
+    let done = 0;
+    onProgress(done, entries.length);
     loadPromise = Promise.all(
-      Object.entries(MODEL_FILES).map(async ([key, file]) => {
+      entries.map(async ([key, file]) => {
         try {
           const gltf = await loader.loadAsync(BASE + file);
           templates[key] = buildTemplate(key, gltf);
         } catch (err) {
           console.warn(`[ModelLibrary] Failed to load ${file} (${err?.message ?? err}); using procedural fallback.`);
+        } finally {
+          done += 1;
+          onProgress(done, entries.length);
         }
       })
     ).then(() => templates);

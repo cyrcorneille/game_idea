@@ -15,9 +15,28 @@ const input = new InputManager(canvas);
 const audio = new AudioEngine();
 const saveSystem = new SaveSystem();
 
-// Characters & vehicles are glTF assets: load them before the world is built so
-// every spawned entity gets the realistic model instead of the primitive fallback.
-Promise.all([preloadModels(), preloadEnvironment()]).then(() => {
+// Characters, vehicles, weapons and the HDRI are heavy glTF/EXR assets. Show progress,
+// keep the menu buttons disabled until they are ready, and never block forever on a
+// slow connection: after 60 s the game starts with the procedural fallbacks.
+const statusEl = document.getElementById('asset-status');
+const menuButtons = [...document.querySelectorAll('#main-menu button')];
+const setStatus = (text) => { if (statusEl) statusEl.textContent = text; };
+const SAFETY_TIMEOUT_MS = 60000;
+
+const assets = Promise.all([
+  preloadModels((done, total) => setStatus(`Chargement des modèles 3D… ${done}/${total}`)),
+  preloadEnvironment()
+]);
+const safety = new Promise((resolve) => setTimeout(resolve, SAFETY_TIMEOUT_MS));
+
+Promise.race([assets, safety]).then(() => {
+  setStatus('');
+  statusEl?.classList.add('hidden');
+  menuButtons.forEach((b) => { b.disabled = false; });
+  startGame();
+});
+
+function startGame() {
   const sim = new GameSimulation(canvas, input, audio, saveSystem);
   const ui = new UIManager(sim, input, audio, saveSystem);
 
@@ -38,4 +57,4 @@ Promise.all([preloadModels(), preloadEnvironment()]).then(() => {
   }
 
   requestAnimationFrame(animate);
-});
+}

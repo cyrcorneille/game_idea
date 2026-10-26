@@ -819,3 +819,18 @@ html, body {
   .portrait-trio, .map-layout { grid-template-columns: 1fr; }
   .controls-strip { display: none; }
 }
+
+/* Asset loading state on the main menu (models & HDRI are fetched before the world is built). */
+.asset-status {
+  margin: 0 0 10px;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  color: #7dd3fc;
+  min-height: 1.2em;
+}
+.asset-status.hidden { display: none; }
+#main-menu button:disabled {
+  opacity: 0.45;
+  cursor: progress;
+  filter: grayscale(0.4);
+}
